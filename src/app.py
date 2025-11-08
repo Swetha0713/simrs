@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
+from flask import jsonify
 import os
 
 app = Flask(__name__)
@@ -39,8 +40,16 @@ with app.app_context():
 # Routes
 # ----------------------------------------------------
 @app.route('/')
+@app.route('/')
 def index():
-    incidents = Incident.query.order_by(Incident.created_at.desc()).all()
+    search = request.args.get('search', '')
+    if search:
+        incidents = Incident.query.filter(
+            (Incident.title.ilike(f'%{search}%')) |
+            (Incident.priority.ilike(f'%{search}%'))
+        ).order_by(Incident.created_at.desc()).all()
+    else:
+        incidents = Incident.query.order_by(Incident.created_at.desc()).all()
     return render_template('index.html', incidents=incidents)
 
 @app.route('/add', methods=['POST'])
@@ -66,6 +75,59 @@ def delete_incident(id):
     db.session.delete(incident)
     db.session.commit()
     return redirect(url_for('index'))
+
+# ----------- API ENDPOINTS -----------
+
+@app.route('/api/incidents', methods=['GET'])
+def api_get_all():
+    incidents = Incident.query.order_by(Incident.created_at.desc()).all()
+    return jsonify([{
+        "id": i.id,
+        "title": i.title,
+        "description": i.description,
+        "priority": i.priority,
+        "status": i.status,
+        "created_at": i.created_at.isoformat()
+    } for i in incidents])
+
+@app.route('/api/incidents/<int:id>', methods=['GET'])
+def api_get_one(id):
+    i = Incident.query.get_or_404(id)
+    return jsonify({
+        "id": i.id,
+        "title": i.title,
+        "description": i.description,
+        "priority": i.priority,
+        "status": i.status,
+        "created_at": i.created_at.isoformat()
+    })
+
+@app.route('/api/incidents', methods=['POST'])
+def api_add_incident():
+    data = request.get_json()
+    new = Incident(
+        title=data.get("title"),
+        description=data.get("description"),
+        priority=data.get("priority", "Low")
+    )
+    db.session.add(new)
+    db.session.commit()
+    return jsonify({"message": "Incident added successfully"}), 201
+
+@app.route('/api/incidents/<int:id>', methods=['PUT'])
+def api_update_status(id):
+    i = Incident.query.get_or_404(id)
+    i.status = "Resolved" if i.status == "Pending" else "Pending"
+    db.session.commit()
+    return jsonify({"message": f"Incident {i.id} status updated"})
+
+@app.route('/api/incidents/<int:id>', methods=['DELETE'])
+def api_delete(id):
+    i = Incident.query.get_or_404(id)
+    db.session.delete(i)
+    db.session.commit()
+    return jsonify({"message": f"Incident {i.id} deleted"})
+
 
 # ----------------------------------------------------
 # Run Flask App
