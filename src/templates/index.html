@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Incident Management System</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Smart Incident Management System</h1>
+        <form action="/add" method="POST">
+            <input type="text" name="title" placeholder="Title" required>
+            <textarea name="description" placeholder="Description" required></textarea>
+            <select name="priority" required>
+                <option value="High">High</option>
+                <option value="Medium">Medium</option>
+                <option value="Low">Low</option>
+            </select>
+            <button type="submit">Add Incident</button>
+        </form>
+
+        <table>
+            <tr>
+                <th>ID</th>
+                <th>Title</th>
+                <th>Priority</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+            {% for i in incidents %}
+            <tr>
+                <td>{{ i.id }}</td>
+                <td>{{ i.title }}</td>
+                <td>{{ i.priority }}</td>
+                <td>{{ i.status }}</td>
+                <td>
+                    <a href="/update/{{ i.id }}" class="btn-yellow">Toggle</a>
+                    <a href="/delete/{{ i.id }}" class="btn-red">Delete</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+</body>
+</html>

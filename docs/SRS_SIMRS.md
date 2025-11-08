@@ -8,7 +8,13 @@ simrs/
 Software Requirements Specification (SRS)
 
 Project: Smart Incident Management & Response System (SIMRS)
-Prepared by: Swetha Dixit
+Prepared by: Swetha Dixit| Deliverable      | Description                               | Format       |
+| ---------------- | ----------------------------------------- | ------------ |
+| SRS Document     | Functional + Non-Functional Requirements  | Markdown/PDF |
+| Use Case Diagram | Actors + System Interactions              | PNG          |
+| Class Diagram    | Object relationships + patterns           | PNG          |
+| GitHub Repo      | Initialized and organized for next sprint | Online       |
+
 Course: 3CS201PC302 – Software Engineering and System Design
 Date: November 2025
 
